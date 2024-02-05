@@ -7,28 +7,27 @@ require("dotenv").config();
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const User_1 = require("./entities/User");
-const Product_1 = require("./entities/Product");
+;
 const main = async () => {
     const app = express_1.default();
-    const mongoUrl = `mongodb+srv://tuankiet270802:63WYUuJ00inc2DSP@cluster0.1ojo2c3.mongodb.net/?retryWrites=true&w=majority`;
-    await mongoose_1.default.connect(mongoUrl, {
-        useCreateIndex: true,
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-        useFindAndModify: false,
-    });
+    const mongoUrl = `mongodb+srv://${process.env.DB_USER_NAME_DEV}:${process.env.DB_PASSWORD_DEV}@cluster0.1ojo2c3.mongodb.net/?retryWrites=true&w=majority`;
+    try {
+        await mongoose_1.default.connect(mongoUrl, {
+            useCreateIndex: true,
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+            useFindAndModify: false,
+        });
+    }
+    catch (error) {
+        console.log("MONGODB Connect Eroor", error);
+    }
     const PORT = process.env.PORT || 4000;
-    const newUser = new User_1.User({
-        username: "exampleUsername2",
-        email: "example@email.com3",
-    });
-    const newProduct = new Product_1.Product({
-        name: "Product 1",
-        thumbnail: "Product 1 thumbnail",
-    });
-    await newUser.save();
-    await newProduct.save();
+    app.use(express_1.default.json());
+    const userRoute = require('./routes/User');
+    const productRoute = require('./routes/Product');
+    app.use('/users', userRoute);
+    app.use('/products', productRoute);
     app.listen(PORT, () => {
         console.log(`Server started on localhost:${PORT}`);
     });
