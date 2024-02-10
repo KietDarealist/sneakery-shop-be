@@ -4,12 +4,14 @@ import mongoose, { Schema, Document } from "mongoose";
 interface IProduct extends Document {
   name: string;
   thumbnail: string;
+  images: string[];
   // Add other fields as needed
 }
 
 const productSchema: Schema = new Schema({
   name: { type: String, required: true },
   thumbnail: { type: String, required: true },
+  images: { type: [String], required: false },
   // Define other fields as needed
 });
 

@@ -24,6 +24,7 @@ const mongoose_1 = __importStar(require("mongoose"));
 const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     thumbnail: { type: String, required: true },
+    images: { type: [String], required: false },
 });
 exports.Product = mongoose_1.default.model("Product", productSchema);
 //# sourceMappingURL=Product.js.map
