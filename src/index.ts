@@ -2,6 +2,7 @@ require("dotenv").config();
 import "reflect-metadata";
 import express, { text } from "express";
 import mongoose from "mongoose";
+import twilio from "twilio";
 
 const main = async () => {
   const app = express();
@@ -21,32 +22,6 @@ const main = async () => {
 
   //PORT
   const PORT = process.env.PORT || 4000;
-
-  //send sms
-  const { Vonage } = require("@vonage/server-sdk");
-  // const vonage = new Vonage({
-  //   apiKey: "ac337f3d",
-  //   apiSecret: "fH3brZLVwmiA8gLt",
-  // });
-  // const from = "Vonage APIs";
-  // const to = "+848437415887";
-  // const text = "A text message sent using the Vonage SMS API";
-
-  // async function sendSMS() {
-  //   await vonage.sms
-  //     .send({ to, from, text })
-  //     .then((resp) => {
-  //       console.log("Message sent successfully");
-  //       console.log(resp);
-  //     })
-  //     .catch((err) => {
-  //       console.log("There was an error sending the messages.");
-  //       console.error(err);
-  //     });
-  // }
-
-  // sendSMS();
-
   app.use(express.json());
 
   //list of routes
