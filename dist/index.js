@@ -7,7 +7,6 @@ require("dotenv").config();
 require("reflect-metadata");
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
-;
 const main = async () => {
     const app = express_1.default();
     const mongoUrl = `mongodb+srv://${process.env.DB_USER_NAME_DEV}:${process.env.DB_PASSWORD_DEV}@cluster0.1ojo2c3.mongodb.net/?retryWrites=true&w=majority`;
@@ -24,10 +23,10 @@ const main = async () => {
     }
     const PORT = process.env.PORT || 4000;
     app.use(express_1.default.json());
-    const userRoute = require('./routes/User');
-    const productRoute = require('./routes/Product');
-    app.use('/users', userRoute);
-    app.use('/products', productRoute);
+    const userRoute = require("./routes/User");
+    const productRoute = require("./routes/Product");
+    app.use("/users", userRoute);
+    app.use("/products", productRoute);
     app.listen(PORT, () => {
         console.log(`Server started on localhost:${PORT}`);
     });

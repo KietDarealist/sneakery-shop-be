@@ -2,6 +2,7 @@ import { CreateUserRequest, LoginUserRequest } from "../types/User";
 import { User } from "../entities/User";
 import express from "express";
 import argon2 from "argon2";
+import twilio from "twilio";
 
 const getUsers = async (req: express.Request, res: express.Response) => {
   try {
@@ -13,7 +14,7 @@ const getUsers = async (req: express.Request, res: express.Response) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
-
+  
 //basic flow register user
 const registerUser = async (req: CreateUserRequest, res: express.Response) => {
   try {

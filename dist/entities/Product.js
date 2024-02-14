@@ -24,7 +24,10 @@ const mongoose_1 = __importStar(require("mongoose"));
 const productSchema = new mongoose_1.Schema({
     name: { type: String, required: true },
     thumbnail: { type: String, required: true },
+    price: { type: Number, required: true },
     images: { type: [String], required: false },
+    brand: { type: String, require: false },
+    size: { type: Number, require: false },
 });
 exports.Product = mongoose_1.default.model("Product", productSchema);
 //# sourceMappingURL=Product.js.map
