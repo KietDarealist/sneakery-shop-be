@@ -2,7 +2,7 @@ require("dotenv").config();
 import "reflect-metadata";
 import express, { text } from "express";
 import mongoose from "mongoose";
-import twilio from "twilio";
+import { sendOTPThroughMail } from "./utils";
 
 const main = async () => {
   const app = express();
@@ -23,6 +23,8 @@ const main = async () => {
   //PORT
   const PORT = process.env.PORT || 4000;
   app.use(express.json());
+
+  sendOTPThroughMail("kietmakietna@gmail.com", "HEHE", "Your code is");
 
   //list of routes
   const userRoute = require("./routes/User");
