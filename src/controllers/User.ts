@@ -20,7 +20,31 @@ const getUsers = async (req: express.Request, res: express.Response) => {
 const registerUser = async (
   req: CreateUserRequest,
   res: express.Response
-) => {};
+) => {
+  try {
+    const { phoneNumber, username, password } = req.body;
+    console.log("phone number", phoneNumber, password);
+    const filteredUsers = await User.findOne({
+      phoneNumber: phoneNumber,
+    });
+
+    if (!!filteredUsers) {
+      res.status(400).json("Phone number is already in use");
+    } else {
+      const encryptedPassword = await argon2.hash(password);
+      const newUser = new User({
+        username: username,
+        phoneNumber: phoneNumber,
+        password: encryptedPassword,
+      });
+      await newUser.save();
+      res.status(200).json("Register user succesfully");
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
+};
 
 //basic flow login user
 const loginUser = async (req: LoginUserRequest, res: express.Response) => {
