@@ -17,10 +17,7 @@ const getUsers = async (req: express.Request, res: express.Response) => {
 };
 
 //basic flow register user
-const registerUser = async (
-  req: CreateUserRequest,
-  res: express.Response
-) => {
+const registerUser = async (req: CreateUserRequest, res: express.Response) => {
   try {
     const { phoneNumber, username, password } = req.body;
     console.log("phone number", phoneNumber, password);
@@ -31,13 +28,16 @@ const registerUser = async (
     if (!!filteredUsers) {
       res.status(400).json("Phone number is already in use");
     } else {
+      //Create a user with isVerifed field is false
       const encryptedPassword = await argon2.hash(password);
       const newUser = new User({
         username: username,
         phoneNumber: phoneNumber,
         password: encryptedPassword,
+        isVerified: false,
       });
       await newUser.save();
+
       res.status(200).json("Register user succesfully");
     }
   } catch (error) {
