@@ -23,8 +23,10 @@ exports.User = void 0;
 const mongoose_1 = __importStar(require("mongoose"));
 const userSchema = new mongoose_1.Schema({
     username: { type: String, required: true, unique: false },
-    phoneNumber: { type: String, require: true, unique: true },
-    password: { type: String, require: true, unique: true },
+    email: { type: String, require: true, unique: true },
+    password: { type: String, require: true, unique: false },
+    phoneNumber: { type: String, require: false, unique: false },
+    isVerified: { type: Boolean, require: true, unique: false },
 });
 exports.User = mongoose_1.default.model("User", userSchema);
 //# sourceMappingURL=User.js.map

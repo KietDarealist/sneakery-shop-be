@@ -1,8 +1,9 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 // Define Mongoose schema for the User entity
-interface IUser extends Document {
+export interface IUser extends Document {
   username: string;
+  email: string;
   phoneNumber: string;
   password: string;
   isVerified: boolean;
@@ -11,8 +12,9 @@ interface IUser extends Document {
 
 const userSchema: Schema = new Schema({
   username: { type: String, required: true, unique: false },
-  phoneNumber: { type: String, require: true, unique: true },
-  password: { type: String, require: true, unique: true },
+  email: { type: String, require: true, unique: true },
+  password: { type: String, require: true, unique: false },
+  phoneNumber: { type: String, require: false, unique: false },
   isVerified: { type: Boolean, require: true, unique: false },
   // Define other fields as needed
 });

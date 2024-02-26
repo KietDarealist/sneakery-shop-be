@@ -3,11 +3,13 @@ import express from "express";
 type CreateUserRequest = express.Request<
   any,
   any,
-  { username: string; phoneNumber: string; password: string }
+  { username: string; email: string; password: string; phoneNumber?: string }
 >;
 
 type LoginUserRequest = express.Request<
   any,
   any,
-  { phoneNumber: string; password: string }
+  { email: string; password: string }
 >;
+
+type VerifyUserOTPRequest = express.Request<any, any, { code: string }>;

@@ -1,11 +1,9 @@
-import mongoose, { Schema, Document,  } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 // Define Mongoose schema for the User entity
-interface IOTP extends Document {
-  username: string;
-  phoneNumber: string;
-  password: string;
-  // Add other fields as needed
+export interface IOTP extends Document {
+  userId: string;
+  otp: string;
 }
 
 const otpSchema: Schema = new Schema({

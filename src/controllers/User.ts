@@ -1,57 +1,93 @@
-import { CreateUserRequest, LoginUserRequest } from "../types/User";
-import { User } from "../entities/User";
+import {
+  CreateUserRequest,
+  LoginUserRequest,
+  VerifyUserOTPRequest,
+} from "../types/User";
+import { IUser, User } from "../entities/User";
 import express from "express";
 import argon2 from "argon2";
-import { sendOTPThroughMail } from "../utils";
-import { OTP } from "src/entities/OTP";
+import { generateOTP, sendOTPThroughMail } from "../utils";
+import { OTP } from "../entities/OTP";
+import { ActionResponse, GetListResponse } from "../types/Response";
 
-const getUsers = async (req: express.Request, res: express.Response) => {
+const getUsers = async (req: express.Request, res: GetListResponse<IUser>) => {
   try {
     const users = await User.find();
     const { params } = req;
-    res.json(users);
+    res.status(200).json({ results: users, success: true, code: 200 });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res.status(500).json({ success: false, results: [], code: 500 });
   }
 };
 
 //basic flow register user
-const registerUser = async (req: CreateUserRequest, res: express.Response) => {
+const registerUser = async (req: CreateUserRequest, res: ActionResponse) => {
   try {
-    const { phoneNumber, username, password } = req.body;
-    console.log("phone number", phoneNumber, password);
+    const { phoneNumber, username, password, email } = req.body;
+    //Validate field
+    if (!password || !email || !username) {
+      return res.status(400).json({
+        success: false,
+        code: 400,
+        message: "Missing one or more field",
+      });
+    }
     const filteredUsers = await User.findOne({
-      phoneNumber: phoneNumber,
+      email: email,
     });
-
     if (!!filteredUsers) {
-      res.status(400).json("Phone number is already in use");
+      return res.status(400).json({
+        success: false,
+        message: "Email is alrealdy in use",
+        code: 400,
+      });
     } else {
       //Create a user with isVerifed field is false
       const encryptedPassword = await argon2.hash(password);
       const newUser = new User({
         username: username,
+        email: email,
         phoneNumber: phoneNumber,
         password: encryptedPassword,
         isVerified: false,
       });
       await newUser.save();
+      const generatedOTP = generateOTP();
 
-      res.status(200).json("Register user succesfully");
+      const otp = new OTP({
+        otp: generatedOTP,
+        userId: newUser?.id,
+      });
+      await otp.save();
+      sendOTPThroughMail(
+        email,
+        "Please verify your OTP",
+        `Your OTP is ${generatedOTP}`
+      );
+      return res.status(200).json({
+        success: true,
+        message: {
+          text: "Register user successfully",
+          verifyID: newUser?.id,
+        },
+        code: 200,
+      });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Internal Server Error", code: 500 });
   }
 };
 
 //basic flow login user
-const loginUser = async (req: LoginUserRequest, res: express.Response) => {
+const loginUser = async (req: LoginUserRequest, res: ActionResponse) => {
   try {
-    const { phoneNumber, password } = req.body;
+    const { email, password } = req.body;
     const existedUser = await User.findOne({
-      phoneNumber: phoneNumber,
+      email: email,
     });
 
     if (!!existedUser) {
@@ -60,17 +96,87 @@ const loginUser = async (req: LoginUserRequest, res: express.Response) => {
         password
       );
       if (isValidPassword) {
-        res.status(200).json("Login successfully");
+        return res.status(200).json({
+          code: 200,
+          success: true,
+          message: {
+            text: "Login successfully",
+            info: {
+              username: existedUser?.username,
+              email: existedUser?.email,
+              phoneNumber: existedUser?.phoneNumber,
+            },
+          },
+        });
       } else {
-        res?.status(400).json("Phone number or password is incorrect");
+        return res?.status(400).json({
+          code: 400,
+          success: false,
+          message: "Email or password is incorrect",
+        });
       }
     } else {
-      res?.status(400).json("Phone number or password is incorrect");
+      return res?.status(400).json({
+        code: 400,
+        success: false,
+        message: "Email or password is incorrect",
+      });
     }
   } catch (error) {
     console.error(error);
-    res.status(500).json({ error: "Internal Server Error" });
+    res
+      .status(500)
+      .json({ success: false, code: 500, message: "Internal Server Error" });
   }
 };
 
-export { getUsers, registerUser, loginUser };
+//basic flow for resend OTP
+const resendOTP = async () => {};
+
+//basic flow for verify otp ]
+const verifyUserOTP = async (
+  req: VerifyUserOTPRequest,
+  res: ActionResponse
+) => {
+  const { userId } = req.params;
+  console.log("userid is", req.params);
+  try {
+    const filterUserOTP = await OTP.findOne({
+      userId: userId,
+    });
+
+    if (!!filterUserOTP) {
+      if (req.body.code == filterUserOTP?.otp) {
+        await User.updateOne(
+          { userId: userId },
+          { $set: { isVerified: true } }
+        );
+        return res.status(200).json({
+          code: 200,
+          success: true,
+          message: "Verification successful",
+        });
+      } else {
+        return res.status(400).json({
+          code: 400,
+          success: false,
+          message: "Your entered OTP is incorrect, please try again",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "Cannot find the user need to verify",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
+};
+
+export { getUsers, registerUser, loginUser, verifyUserOTP };
