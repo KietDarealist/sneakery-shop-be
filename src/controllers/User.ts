@@ -9,6 +9,7 @@ import argon2 from "argon2";
 import { generateOTP, sendOTPThroughMail } from "../utils";
 import { OTP } from "../entities/OTP";
 import { ActionResponse, GetListResponse } from "../types/Response";
+import jsonwebToken from "jsonwebtoken";
 
 const getUsers = async (req: express.Request, res: GetListResponse<IUser>) => {
   try {
@@ -96,15 +97,27 @@ const loginUser = async (req: LoginUserRequest, res: ActionResponse) => {
         password
       );
       if (isValidPassword) {
+        const accessToken = jsonwebToken.sign(
+          {
+            userId: existedUser._id,
+            email: existedUser.email,
+          },
+          `${process.env.ACCESS_TOKEN_SECRET}`,
+          { expiresIn: "7d" } // Set the expiration time as needed
+        );
+
         return res.status(200).json({
           code: 200,
           success: true,
           message: {
             text: "Login successfully",
             info: {
-              username: existedUser?.username,
-              email: existedUser?.email,
-              phoneNumber: existedUser?.phoneNumber,
+              user: {
+                username: existedUser?.username,
+                email: existedUser?.email,
+                phoneNumber: existedUser?.phoneNumber,
+              },
+              accessToken: accessToken,
             },
           },
         });
@@ -130,16 +143,12 @@ const loginUser = async (req: LoginUserRequest, res: ActionResponse) => {
   }
 };
 
-//basic flow for resend OTP
-const resendOTP = async () => {};
-
-//basic flow for verify otp ]
+//basic flow for verify otp
 const verifyUserOTP = async (
   req: VerifyUserOTPRequest,
   res: ActionResponse
 ) => {
   const { userId } = req.params;
-  console.log("userid is", req.params);
   try {
     const filterUserOTP = await OTP.findOne({
       userId: userId,
@@ -178,5 +187,7 @@ const verifyUserOTP = async (
     });
   }
 };
+
+//basic flow for edit user
 
 export { getUsers, registerUser, loginUser, verifyUserOTP };

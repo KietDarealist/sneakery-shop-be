@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 // Define Mongoose schema for the Product entity
-interface IProduct extends Document {
+export interface IProduct extends Document {
   name: string;
   thumbnail: string;
   price: number;
