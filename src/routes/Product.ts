@@ -1,9 +1,10 @@
-import express from 'express'
-import {getProducts} from "../controllers/Product"
-const router = express.Router()
-
+import express from "express";
+import { createProduct, getProducts } from "../controllers/Product";
+import { validateFieldPayload } from "../middlewares";
+const router = express.Router();
 
 // define the about route
-router.get('/', getProducts)
+router.get("/", getProducts);
+router.post("/create", createProduct);
 
-module.exports = router
+module.exports = router;

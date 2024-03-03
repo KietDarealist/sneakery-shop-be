@@ -3,6 +3,7 @@ import mongoose, { Schema, Document } from "mongoose";
 // Define Mongoose schema for the Product entity
 export interface IProduct extends Document {
   name: string;
+  category: string;
   thumbnail: string;
   price: number;
   images?: string[];
@@ -13,6 +14,7 @@ export interface IProduct extends Document {
 
 const productSchema: Schema = new Schema({
   name: { type: String, required: true },
+  category: { type: String, required: true },
   thumbnail: { type: String, required: true },
   price: { type: Number, required: true },
   images: { type: [String], required: false },

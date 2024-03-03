@@ -5,6 +5,7 @@ type CreateProductPayload = express.Request<
   any,
   {
     name: string;
+    category: string;
     thumbnail: string;
     price: number;
     images?: string[];
@@ -12,5 +13,3 @@ type CreateProductPayload = express.Request<
     size?: number;
   }
 >;
-
-
