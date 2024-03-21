@@ -12,4 +12,10 @@ type LoginUserRequest = express.Request<
   { email: string; password: string }
 >;
 
+type EditUserRequest = express.Request<
+  any,
+  any,
+  { username: string; phoneNumber: string }
+>;
+
 type VerifyUserOTPRequest = express.Request<any, any, { code: string }>;

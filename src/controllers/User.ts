@@ -1,5 +1,6 @@
 import {
   CreateUserRequest,
+  EditUserRequest,
   LoginUserRequest,
   VerifyUserOTPRequest,
 } from "../types/User";
@@ -189,5 +190,16 @@ const verifyUserOTP = async (
 };
 
 //basic flow for edit user
+const editUser = async (req: EditUserRequest, res: ActionResponse) => {
+  try {
+    const headers = req.headers;
+    console.log("HEADERS IS", headers);
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, code: 500, message: "Internal Server Error" });
+  }
+};
 
-export { getUsers, registerUser, loginUser, verifyUserOTP };
+export { getUsers, registerUser, loginUser, verifyUserOTP, editUser };

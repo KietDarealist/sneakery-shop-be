@@ -8,7 +8,7 @@ const getProducts = async (
   res: GetListResponse<IProduct>
 ) => {
   try {
-    const { name, brand, size, category } = req.query;
+    const { name, brand, size, category, page = 1, limit = 10 } = req.query;
     const queryConditions: { [key: string]: any } = {};
 
     if (brand) {
@@ -27,7 +27,11 @@ const getProducts = async (
       queryConditions.category = category;
     }
 
-    const products = await Product.find(queryConditions);
+    const skip =
+      (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
+    const products = await Product.find(queryConditions)
+      .skip(skip)
+      .limit(parseInt(limit as string, 10));
 
     return res.json({ success: true, results: products || [], code: 200 });
   } catch (error) {
