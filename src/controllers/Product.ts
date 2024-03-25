@@ -29,14 +29,22 @@ const getProducts = async (
 
     const skip =
       (parseInt(page as string, 10) - 1) * parseInt(limit as string, 10);
+    const totalRecords = await Product.countDocuments();
     const products = await Product.find(queryConditions)
       .skip(skip)
       .limit(parseInt(limit as string, 10));
 
-    return res.json({ success: true, results: products || [], code: 200 });
+    return res.json({
+      success: true,
+      results: products || [],
+      totalRecords: totalRecords,
+      code: 200,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ code: 500, success: false, results: [] });
+    res
+      .status(500)
+      .json({ code: 500, success: false, totalRecords: 0, results: [] });
   }
 };
 
@@ -65,13 +73,23 @@ const createProduct = async (
   res: ActionResponse
 ) => {
   try {
-    const { name, category, thumbnail, price, images, brand, size } = req.body;
+    const {
+      name,
+      category,
+      thumbnail,
+      price,
+      description,
+      images,
+      brand,
+      size,
+    } = req.body;
 
     const product = new Product({
       name: name,
       category: category.toLowerCase(),
       thumbnail: thumbnail,
       price: price,
+      description: description,
       images: images,
       brand: brand?.toLowerCase(),
       size: size,

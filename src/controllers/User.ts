@@ -10,16 +10,24 @@ import argon2 from "argon2";
 import { generateOTP, sendOTPThroughMail } from "../utils";
 import { OTP } from "../entities/OTP";
 import { ActionResponse, GetListResponse } from "../types/Response";
-import jsonwebToken from "jsonwebtoken";
+import jsonwebToken, { JsonWebTokenError } from "jsonwebtoken";
 
 const getUsers = async (req: express.Request, res: GetListResponse<IUser>) => {
   try {
     const users = await User.find();
     const { params } = req;
-    res.status(200).json({ results: users, success: true, code: 200 });
+    const totalRecords = await User.countDocuments();
+    res.status(200).json({
+      results: users,
+      totalRecords: totalRecords,
+      success: true,
+      code: 200,
+    });
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, results: [], code: 500 });
+    res
+      .status(500)
+      .json({ success: false, totalRecords: 0, results: [], code: 500 });
   }
 };
 
@@ -98,108 +106,3 @@ const loginUser = async (req: LoginUserRequest, res: ActionResponse) => {
         password
       );
       if (isValidPassword) {
-        const accessToken = jsonwebToken.sign(
-          {
-            userId: existedUser._id,
-            email: existedUser.email,
-          },
-          `${process.env.ACCESS_TOKEN_SECRET}`,
-          { expiresIn: "7d" } // Set the expiration time as needed
-        );
-
-        return res.status(200).json({
-          code: 200,
-          success: true,
-          message: {
-            text: "Login successfully",
-            info: {
-              user: {
-                username: existedUser?.username,
-                email: existedUser?.email,
-                phoneNumber: existedUser?.phoneNumber,
-              },
-              accessToken: accessToken,
-            },
-          },
-        });
-      } else {
-        return res?.status(400).json({
-          code: 400,
-          success: false,
-          message: "Email or password is incorrect",
-        });
-      }
-    } else {
-      return res?.status(400).json({
-        code: 400,
-        success: false,
-        message: "Email or password is incorrect",
-      });
-    }
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ success: false, code: 500, message: "Internal Server Error" });
-  }
-};
-
-//basic flow for verify otp
-const verifyUserOTP = async (
-  req: VerifyUserOTPRequest,
-  res: ActionResponse
-) => {
-  const { userId } = req.params;
-  try {
-    const filterUserOTP = await OTP.findOne({
-      userId: userId,
-    });
-
-    if (!!filterUserOTP) {
-      if (req.body.code == filterUserOTP?.otp) {
-        await User.updateOne(
-          { userId: userId },
-          { $set: { isVerified: true } }
-        );
-        return res.status(200).json({
-          code: 200,
-          success: true,
-          message: "Verification successful",
-        });
-      } else {
-        return res.status(400).json({
-          code: 400,
-          success: false,
-          message: "Your entered OTP is incorrect, please try again",
-        });
-      }
-    } else {
-      return res.status(400).json({
-        code: 400,
-        success: false,
-        message: "Cannot find the user need to verify",
-      });
-    }
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Internal Server Error",
-      code: 500,
-    });
-  }
-};
-
-//basic flow for edit user
-const editUser = async (req: EditUserRequest, res: ActionResponse) => {
-  try {
-    const headers = req.headers;
-    console.log("HEADERS IS", headers);
-  } catch (error) {
-    console.error(error);
-    res
-      .status(500)
-      .json({ success: false, code: 500, message: "Internal Server Error" });
-  }
-};
-
-export { getUsers, registerUser, loginUser, verifyUserOTP, editUser };
