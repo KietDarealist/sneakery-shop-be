@@ -12,7 +12,7 @@ const router = express.Router();
 router.get("/", getUsers);
 router.post("/register", registerUser);
 router.post("/verifyOTP/:userId", verifyUserOTP);
-router.post("/editUser", editUser);
+router.put("/", editUser);
 router.post("/login", loginUser);
 
 module.exports = router;

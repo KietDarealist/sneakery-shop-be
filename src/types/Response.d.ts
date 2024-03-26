@@ -12,6 +12,7 @@ type ActionResponse = express.Response<{
 type GetListResponse<T> = express.Response<{
   code: ResponseCodeType;
   results: Array<T> | [];
+  totalRecords: number;
   success: boolean;
 }>;
 

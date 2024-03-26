@@ -8,8 +8,9 @@ type CreateProductPayload = express.Request<
     category: string;
     thumbnail: string;
     price: number;
+    description?: string;
     images?: string[];
     brand?: string;
-    size?: number;
+    size?: number[];
   }
 >;

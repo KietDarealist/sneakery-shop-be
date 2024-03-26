@@ -6,9 +6,10 @@ export interface IProduct extends Document {
   category: string;
   thumbnail: string;
   price: number;
+  description?: string;
   images?: string[];
   brand?: string;
-  size?: number;
+  size?: number[];
   // Add other fields as needed
 }
 
@@ -17,9 +18,10 @@ const productSchema: Schema = new Schema({
   category: { type: String, required: true },
   thumbnail: { type: String, required: true },
   price: { type: Number, required: true },
+  description: { type: String, require: false },
   images: { type: [String], required: false },
   brand: { type: String, require: false },
-  size: { type: Number, require: false },
+  size: { type: [Number], require: false },
 
   // Define other fields as needed
 });

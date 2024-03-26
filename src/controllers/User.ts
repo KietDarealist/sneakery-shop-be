@@ -106,3 +106,143 @@ const loginUser = async (req: LoginUserRequest, res: ActionResponse) => {
         password
       );
       if (isValidPassword) {
+        const accessToken = jsonwebToken.sign(
+          {
+            userId: existedUser._id,
+            email: existedUser.email,
+          },
+          `${process.env.ACCESS_TOKEN_SECRET}`,
+          { expiresIn: "7d" } // Set the expiration time as needed
+        );
+
+        return res.status(200).json({
+          code: 200,
+          success: true,
+          message: {
+            text: "Login successfully",
+            info: {
+              user: {
+                username: existedUser?.username,
+                email: existedUser?.email,
+                phoneNumber: existedUser?.phoneNumber,
+              },
+              accessToken: accessToken,
+            },
+          },
+        });
+      } else {
+        return res?.status(400).json({
+          code: 400,
+          success: false,
+          message: "Email or password is incorrect",
+        });
+      }
+    } else {
+      return res?.status(400).json({
+        code: 400,
+        success: false,
+        message: "Email or password is incorrect",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, code: 500, message: "Internal Server Error" });
+  }
+};
+
+//basic flow for verify otp
+const verifyUserOTP = async (
+  req: VerifyUserOTPRequest,
+  res: ActionResponse
+) => {
+  const { userId } = req.params;
+  try {
+    const filterUserOTP = await OTP.findOne({
+      userId: userId,
+    });
+
+    if (!!filterUserOTP) {
+      if (req.body.code == filterUserOTP?.otp) {
+        await User.updateOne(
+          { userId: userId },
+          { $set: { isVerified: true } }
+        );
+        return res.status(200).json({
+          code: 200,
+          success: true,
+          message: "Verification successful",
+        });
+      } else {
+        return res.status(400).json({
+          code: 400,
+          success: false,
+          message: "Your entered OTP is incorrect, please try again",
+        });
+      }
+    } else {
+      return res.status(400).json({
+        code: 400,
+        success: false,
+        message: "Cannot find the user need to verify",
+      });
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Internal Server Error",
+      code: 500,
+    });
+  }
+};
+
+//basic flow for edit user
+const editUser = async (req: EditUserRequest, res: ActionResponse) => {
+  try {
+    const authorizationHeader = req.headers.authorization;
+    const token = authorizationHeader.split(" ")?.[1];
+    const decodedInfo = await jsonwebToken.decode(token, { complete: true });
+    const userInfo = decodedInfo?.payload as any;
+    const existedUser = await User.findOne({
+      _id: userInfo.userId,
+    });
+    if (!!existedUser) {
+      await User.updateOne(
+        { userId: userInfo.userId },
+        {
+          $set: {
+            username: req.body.username,
+            phoneNumber: req.body.phoneNumber,
+          },
+        }
+      );
+
+      return res.status(200).json({
+        code: 200,
+        success: true,
+        message: {
+          userInfo: {
+            ...existedUser,
+            username: req.body.username,
+            phoneNumber: req.body.phoneNumber,
+          },
+          text: "Cập nhật thông tin người dùng thành công",
+        },
+      });
+    } else {
+      return res.status(400).json({
+        code: 200,
+        success: true,
+        message: "Không thể tìm thấy người dùng, vui lòng thử lại sau",
+      });
+    }
+  } catch (error) {
+    console.error(error);
+    res
+      .status(500)
+      .json({ success: false, code: 500, message: "Internal Server Error" });
+  }
+};
+
+export { getUsers, registerUser, loginUser, verifyUserOTP, editUser };
